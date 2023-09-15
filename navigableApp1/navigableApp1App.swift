@@ -8,13 +8,10 @@
 import SwiftUI
 
 @main
-struct navigableApp1App: App {
-    let persistenceController = PersistenceController.shared
-
+struct NavigationApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }

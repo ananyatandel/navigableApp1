@@ -9,78 +9,94 @@ import SwiftUI
 import CoreData
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    // State properties - alert and modal sheet presentation.
+        @State private var showAlert = false
+        @State private var showSheet = false
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+    // home view
+        var body: some View {
+            NavigationView {
+                // initiate tab view
+                TabView {
+                    // First Tab
+                    NavigationLink(destination: FirstDetailView()) {
+                        Text("First Tab View")
+                    }
+                    .tabItem {
+                        Image(systemName: "1.circle")
+                        Text("1st Tab")
+                    }
 
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                    // Second Tab
+                    NavigationLink(destination: SecondDetailView()) {
+                        Text("Second Tab View")
+                    }
+                    .tabItem {
+                        Image(systemName: "2.circle")
+                        Text("2nd Tab")
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                // Configure the navigation bar for the tab view.
+                .navigationBarTitle("Navigable App")
+                .navigationBarItems(
+                    trailing: Button(action: {
+                        self.showAlert = true
+                    }) {
+                        Image(systemName: "exclamationmark.circle")
                     }
+                )
+                // Initiate an alert
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Alert"),
+                        message: Text("This is an alert message."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+                // Present the modal sheet when showSheet is true.
+                .sheet(isPresented: $showSheet) {
+                    ModalView()
                 }
             }
-            Text("Select an item")
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+// detail view 1 - after tab view
+    struct FirstDetailView: View {
+        var body: some View {
+            Text("First Detail View")
+                .navigationBarTitle("First Detail", displayMode: .inline)
+        }
+    }
 
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+// detail view 2 - after tab view
+    struct SecondDetailView: View {
+        var body: some View {
+            Text("Second Detail View")
+                .navigationBarTitle("Second Detail", displayMode: .inline)
+        }
+    }
+
+// modal view attempt
+    struct ModalView: View {
+        var body: some View {
+            NavigationView {
+                VStack {
+                    Text("Modal View")
+//                    Spacer()
+                }
+                // Configure the navigation bar for the modal sheet.
+                .navigationBarTitle("Modal Sheet")
+                .navigationBarItems(trailing: Button("Done") {
+                    // Dismiss the modal sheet when pressing "Done"
+                })
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+    
 
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-}
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
+// from stack overflow - was having trouble with the preview showing up
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
