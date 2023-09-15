@@ -83,9 +83,8 @@ struct ContentView: View {
             NavigationView {
                 VStack {
                     Text("Modal View")
-//                    Spacer()
                 }
-                // Configure the navigation bar for the modal sheet.
+                // Configure the nav bar
                 .navigationBarTitle("Modal Sheet")
                 .navigationBarItems(trailing: Button("Done") {
                     // Dismiss the modal sheet when pressing "Done"
